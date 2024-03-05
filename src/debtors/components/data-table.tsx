@@ -81,7 +81,7 @@ export function DataTable<TData, TValue>({
       
     },
     sortingFns: {
-      sortByStep: (rowA: any, rowB: any, columnId: any): number =>
+      sortByStep: (rowA: any, rowB: any): number =>
         rowA.getValue("step").value < rowB.getValue("step").value ? 1 : -1,
     },
     state: {

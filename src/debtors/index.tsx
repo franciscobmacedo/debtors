@@ -13,9 +13,8 @@ import {
   Option,
 } from "./schema";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
 import useSWR from "swr";
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from "react-i18next";
 
 const colectiveCsvConfig = mkConfig({
   useKeysAsHeaders: true,
@@ -26,14 +25,12 @@ const singluarCsvConfig = mkConfig({
   filename: "devedores-singulares",
 });
 
-
-
 export default function DebtorsTable() {
   const { t } = useTranslation();
 
   const fetcher = (url: string) => fetch(url).then((res) => res.json());
   const url =
-    "https://raw.githubusercontent.com/franciscobmacedo/devedores/main/data/debtors.json";
+    "https://raw.githubusercontent.com/franciscobmacedo/devedores-scraper/main/data/debtors.json";
   const { data, error } = useSWR<DebtorResponse>(url, fetcher);
 
   if (error) return <div>Failed to load</div>;
@@ -77,30 +74,21 @@ export default function DebtorsTable() {
 
   return (
     <>
-      <div className="hidden h-full flex-1 flex-col space-y-8 p-8 md:flex">
-        <div className="flex items-center justify-between space-y-2">
-          <div>
-            <h2 className="text-2xl font-bold tracking-tight">Welcome back!</h2>
-            <p className="text-muted-foreground">
-            {t("Debtors")}
-            </p>
-          </div>
-        </div>
-
+      <div className="flex h-full flex-1 flex-col space-y-8 p-8">
         <Tabs defaultValue="colective">
-          <TabsList className="ml-auto">
-            <TabsTrigger
-              value="colective"
-              className="text-zinc-600 dark:text-zinc-200"
-            >
-              {t("Colective Debtors")}
-            </TabsTrigger>
-            <TabsTrigger
-              value="singular"
-              className="text-zinc-600 dark:text-zinc-200"
-            >
-              {t("Singular Debtors")}
-            </TabsTrigger>
+          <TabsList>
+              <TabsTrigger
+                value="colective"
+                className="text-zinc-600 dark:text-zinc-200"
+              >
+                {t("Colective Debtors")}
+              </TabsTrigger>
+              <TabsTrigger
+                value="singular"
+                className="text-zinc-600 dark:text-zinc-200"
+              >
+                {t("Singular Debtors")}
+              </TabsTrigger>
           </TabsList>
 
           <TabsContent value="colective" className="m-0">

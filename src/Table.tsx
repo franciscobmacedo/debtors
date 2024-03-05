@@ -1,8 +1,3 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
-import { Button } from "@/components/ui/button"
 import {
   Table,
   TableBody,
@@ -13,7 +8,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import useSWR, { Fetcher } from "swr";
+import useSWR from "swr";
 
 export interface Step {
   start: number;
@@ -39,7 +34,7 @@ export interface DebtorResponse {
 }
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
-function DebtorTable() {
+export default function DebtorTable() {
   const url = "https://raw.githubusercontent.com/franciscobmacedo/devedores/main/data/debtors.json?token=GHSAT0AAAAAACK25P2AVB6S5MVOS36CXAVMZOKJKFQ"
 
   const { data, error } = useSWR<DebtorResponse>(
