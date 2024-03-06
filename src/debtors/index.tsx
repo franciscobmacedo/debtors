@@ -31,7 +31,7 @@ export default function DebtorsTable() {
 
   return (
     <>
-      <div className="flex h-full flex-1 flex-col space-y-8 p-8">
+      <div className="flex h-full flex-1 flex-col space-y-8 md:px-8 py-8">
         <Tabs defaultValue="colective" className="text-center">
           <TabsList className="mb-12">
             <TabsTrigger

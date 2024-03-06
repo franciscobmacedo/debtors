@@ -13,6 +13,7 @@ const resources = {
       "Singular Debtors": "Devedores Singulares",
         "Export": "Exportar",
         "Debtors": "Devedores",
+        "Debtors list": "Lista de devedores",
         "NIPC": "NIPC",
         "Name": "Nome",
         "Debt Interval": "Intervalo de dívida",
@@ -27,6 +28,8 @@ const resources = {
         "Go to last page": "Ir para a última página",
         "Go to first page": "Ir para a primeira página",
         "selected": "seleccionados",
+        "Debtors list to the Tax Authority. Data gathered from the": "Lista de devedores à Autoridade Tributária. Os dados foram recolhidos no",
+        "tax authority portal": "portal das finanças",
 
       },
   },

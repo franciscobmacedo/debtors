@@ -23,7 +23,7 @@ export function Download<TData>({ table, exportName }: ExportProps<TData>) {
     return;
   };
   return (
-    <Button variant="ghost" className="h-8 px-2 lg:px-3" onClick={downloadData}>
+    <Button variant="ghost" className="h-8 px-2 lg:px-3 text-xs" onClick={downloadData}>
       <DownloadIcon className="mr-2 h-4 w-4" />
       {t("Export")}
     </Button>

@@ -65,15 +65,14 @@ export function DataTableToolbar<TData>({
   const { t } = useTranslation();
 
   return (
-    <div className="flex items-center justify-between">
-      <div className="flex flex-1 items-center space-x-2">
+    <div className="flex flex-col sm:flex-row items-center justify-between gap-y-2">
+      <div className="flex flex-col sm:flex-row flex-1 w-full sm:items-center space-x-2 gap-y-2">
         <DebouncedInput
           value={globalFilter ?? ""}
           onChange={(value) => setGlobalFilter(String(value))}
-          className="h-8 w-[150px] lg:w-[250px]"
+          className="h-8 w-full sm:w-64 lg:w-96"
           placeholder={t("Search all columns") + "..."}
         />
-
         {table.getColumn("step_text") && (
           <DataTableFacetedFilter
             column={table.getColumn("step_text")}
