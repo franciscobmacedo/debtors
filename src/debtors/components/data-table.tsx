@@ -37,8 +37,8 @@ import {  Option } from "../schema";
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
   data: TData[]
-  debtIntervals: Option[],
-  downloadData: () => void
+  debtIntervals: Option[]
+  exportName: string
 }
 
 
@@ -60,7 +60,7 @@ export function DataTable<TData, TValue>({
   columns,
   data,
   debtIntervals,
-  downloadData
+  exportName
 }: DataTableProps<TData, TValue>) {
   
   const [columnVisibility, setColumnVisibility] =
@@ -72,6 +72,8 @@ export function DataTable<TData, TValue>({
   )
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [globalFilter, setGlobalFilter] = React.useState('')
+
+  
 
   const table = useReactTable({
     data,
@@ -107,7 +109,7 @@ export function DataTable<TData, TValue>({
   return (
     <div className="space-y-4">
      
-      <DataTableToolbar table={table} globalFilter={globalFilter} setGlobalFilter={setGlobalFilter} debtIntervals={debtIntervals} downloadData={downloadData} />
+      <DataTableToolbar table={table} exportName={exportName} globalFilter={globalFilter} setGlobalFilter={setGlobalFilter} debtIntervals={debtIntervals} />
       <div className="rounded-md border">
         <Table>
           <TableHeader>

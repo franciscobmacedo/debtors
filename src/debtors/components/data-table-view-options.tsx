@@ -51,7 +51,7 @@ export function DataTableViewOptions<TData>({
                 checked={column.getIsVisible()}
                 onCheckedChange={(value) => column.toggleVisibility(!!value)}
               >
-                {column.columnDef.meta?.title ?? column.id}
+                {column.columnDef.meta?.title() ?? column.id}
               </DropdownMenuCheckboxItem>
             )
           })}

@@ -10,21 +10,23 @@ import i18next from 'i18next';
 
 declare module "@tanstack/react-table" {
   interface ColumnMeta<TData extends RowData, TValue> {
-    title: string;
+    title: () => string;
   }
   interface SortingFns {
     sortByStep: SortingFn<unknown>;
   }
 }
 
+
+
 export const colectiveDebtorColumns: ColumnDef<ColectiveDebtor>[] = [
   {
     accessorKey: "nipc",
     meta: {
-      title: i18next.t("NIPC"),
+      title: () => i18next.t("NIPC"),
     },
     header: ({ column }) => {
-      const title = column.columnDef.meta?.title || i18next.t("NIPC");
+      const title = column.columnDef.meta?.title() || i18next.t("NIPC");
       return <DataTableColumnHeader column={column} title={title} />;
     },
     cell: ({ row }) => <div className="w-[80px]">{row.getValue("nipc")}</div>,
@@ -33,10 +35,10 @@ export const colectiveDebtorColumns: ColumnDef<ColectiveDebtor>[] = [
   {
     accessorKey: "name",
     meta: {
-      title: i18next.t("Name"),
+      title: () => i18next.t("Name"),
     },
     header: ({ column }) => {
-      const title = column.columnDef.meta?.title || i18next.t("Name");
+      const title = column.columnDef.meta?.title() || i18next.t("Name");
       return <DataTableColumnHeader column={column} title={title} />
     },
       
@@ -53,10 +55,10 @@ export const colectiveDebtorColumns: ColumnDef<ColectiveDebtor>[] = [
   {
     accessorKey: "step_text",
     meta: {
-      title: i18next.t("Debt Interval"),
+      title: () => i18next.t("Debt Interval"),
     },
     header: ({ column }) => {
-      const title = column.columnDef.meta?.title || i18next.t("Debt Interval");
+      const title = column.columnDef.meta?.title() || i18next.t("Debt Interval");
       return <DataTableColumnHeader column={column} title={title} />
     },
     cell: ({ row }) => {
@@ -84,10 +86,10 @@ export const singularDebtorColumns: ColumnDef<SingularDebtor>[] = [
   {
     accessorKey: "nif",
     meta: {
-      title: i18next.t("NIF"),
+      title: () => i18next.t("NIF"),
     },
     header: ({ column }) => {
-      const title = column.columnDef.meta?.title || i18next.t("NIF");
+      const title = column.columnDef.meta?.title() || i18next.t("NIF");
       return <DataTableColumnHeader column={column} title={title} />;
     },
     cell: ({ row }) => <div className="w-[80px]">{row.getValue("nif")}</div>,
@@ -96,10 +98,10 @@ export const singularDebtorColumns: ColumnDef<SingularDebtor>[] = [
   {
     accessorKey: "name",
     meta: {
-      title: i18next.t("Name"),
+      title: () => i18next.t("Name"),
     },
     header: ({ column }) => {
-      const title = column.columnDef.meta?.title || i18next.t("Name");
+      const title = column.columnDef.meta?.title() || i18next.t("Name");
       return <DataTableColumnHeader column={column} title={title} />
     },
       
@@ -116,10 +118,10 @@ export const singularDebtorColumns: ColumnDef<SingularDebtor>[] = [
   {
     accessorKey: "step_text",
     meta: {
-      title: i18next.t("Debt Interval"),
+      title: () => i18next.t("Debt Interval"),
     },
     header: ({ column }) => {
-      const title = column.columnDef.meta?.title || i18next.t("Debt Interval");
+      const title = column.columnDef.meta?.title() || i18next.t("Debt Interval");
       return <DataTableColumnHeader column={column} title={title} />
     },
     cell: ({ row }) => {

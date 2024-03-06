@@ -10,7 +10,9 @@ import { DataTableViewOptions } from "./data-table-view-options";
 
 import { DataTableFacetedFilter } from "./data-table-faceted-filter";
 import { Option } from "../schema";
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from "react-i18next";
+import { Download } from "./download";
+
 function DebouncedInput({
   value: initialValue,
   onChange,
@@ -46,18 +48,18 @@ function DebouncedInput({
 
 interface DataTableToolbarProps<TData> {
   table: Table<TData>;
+  exportName: string;
   globalFilter: string;
   setGlobalFilter: (value: string) => void;
   debtIntervals: Option[];
-  downloadData: () => void;
 }
 
 export function DataTableToolbar<TData>({
   table,
+  exportName,
   globalFilter,
   setGlobalFilter,
   debtIntervals,
-  downloadData
 }: DataTableToolbarProps<TData>) {
   const isFiltered = table.getState().columnFilters.length > 0;
 
@@ -93,15 +95,8 @@ export function DataTableToolbar<TData>({
       </div>
       <div className="flex flex-1 items-center space-x-2">
         <DataTableViewOptions table={table} />
-        <Button
-          variant="ghost"
-          className="h-8 px-2 lg:px-3"
-          onClick={downloadData}
-        >
-          <DownloadIcon className="mr-2 h-4 w-4" />
-          {t("Export")}
-        </Button>
-      </div>{" "}
+        <Download exportName={exportName} table={table} /> 
+      </div>
     </div>
   );
 }
