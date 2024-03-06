@@ -1,4 +1,4 @@
-import { mkConfig, generateCsv, download, ConfigOptions } from "export-to-csv";
+import { mkConfig, generateCsv, download } from "export-to-csv";
 import { DownloadIcon } from "@radix-ui/react-icons";
 import { useTranslation } from "react-i18next";
 import { Table } from "@tanstack/react-table";
