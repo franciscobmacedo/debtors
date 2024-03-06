@@ -1,6 +1,6 @@
 import DebtorsTable from "@/debtors";
 import { useTranslation } from "react-i18next";
-import { Button } from "./ui/button";
+import { Button } from "./components/ui/button";
 
 function App() {
   const { t, i18n } = useTranslation();
@@ -11,7 +11,7 @@ function App() {
 
   return (
     <>
-      <div className="container mx-auto justify-center">
+      <div className="container  mx-auto flex flex-col justify-start h-screen flex-1">
         <div className="flex flex-col justify-center items-center my-10">
           <h2 className="text-2xl font-bold tracking-tight">{t("Debtors")}</h2>
           <div className="my-2">
@@ -32,8 +32,9 @@ function App() {
             </Button>
           </div>
         </div>
-
-        <DebtorsTable />
+        <div className="flex flex-col flex-1 justify-center ">
+          <DebtorsTable />
+        </div>
       </div>
     </>
   );
