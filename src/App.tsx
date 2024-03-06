@@ -35,16 +35,7 @@ function App() {
           </div>
         </div>
         <div className="flex flex-col flex-1 justify-center text-center">
-          <p className="font-light text-sm ">
-            {t("Debtors list to the Tax Authority. Data gathered from the")}
-              <a
-                href="https://static.portaldasfinancas.gov.pt/app/devedores_static/de-devedores.html"
-                target="_blank"
-                className="ml-1 font-semibold hover:underline underline-offset-2"
-              >
-                 {t("tax authority portal")}
-              </a>.
-          </p>
+          
           <DebtorsTable />
         </div>
       </div>

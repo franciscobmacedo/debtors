@@ -31,6 +31,16 @@ export default function DebtorsTable() {
 
   return (
     <>
+    <p className="font-light text-sm ">
+            {t("Debtors list to the Tax Authority. Data gathered from the")}
+              <a
+                href="https://static.portaldasfinancas.gov.pt/app/devedores_static/de-devedores.html"
+                target="_blank"
+                className="ml-1 font-semibold hover:underline underline-offset-2"
+              >
+                 {t("tax authority portal")}
+              </a>.
+          </p>
       <div className="flex h-full flex-1 flex-col space-y-8 md:px-8 py-8">
         <Tabs defaultValue="colective" className="text-center">
           <TabsList className="mb-12">
