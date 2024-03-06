@@ -32,6 +32,7 @@ import {
 import { DataTablePagination } from "./data-table-pagination"
 import { DataTableToolbar } from "./data-table-toolbar"
 import {  Option } from "../schema";
+import { useTranslation } from "react-i18next";
 
 
 interface DataTableProps<TData, TValue> {
@@ -106,6 +107,9 @@ export function DataTable<TData, TValue>({
     getFacetedUniqueValues: getFacetedUniqueValues(),
   })
 
+  const { t } = useTranslation();
+
+
   return (
     <div className="space-y-4">
      
@@ -152,7 +156,7 @@ export function DataTable<TData, TValue>({
                   colSpan={columns.length}
                   className="h-24 text-center"
                 >
-                  No results.
+                  {t("No results")}.
                 </TableCell>
               </TableRow>
             )}

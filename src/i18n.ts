@@ -28,8 +28,10 @@ const resources = {
         "Go to last page": "Ir para a última página",
         "Go to first page": "Ir para a primeira página",
         "selected": "seleccionados",
-        "Debtors list to the Tax Authority. Data gathered from the": "Lista de devedores à Autoridade Tributária. Os dados foram recolhidos no",
+        "Debtors list to the Tax Authority. Data gathered from the": "Lista de devedores à Autoridade Tributária. Dados recolhidos no",
         "tax authority portal": "portal das finanças",
+        "of": "de",
+        "No results": "Sem resultados",
 
       },
   },

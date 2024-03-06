@@ -48,7 +48,7 @@ export function DataTablePagination<TData>({
           </Select>
         </div>
         <div className="flex  items-center justify-center text-sm font-medium">
-          {t("Page")} {table.getState().pagination.pageIndex + 1} of{" "}
+          {t("Page")} {table.getState().pagination.pageIndex + 1} {t("of")} {" "}
           {table.getPageCount()}
         </div>
         <div className="flex items-center space-x-2">
