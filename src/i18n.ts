@@ -32,6 +32,10 @@ const resources = {
         "tax authority portal": "portal das finanças",
         "of": "de",
         "No results": "Sem resultados",
+        "last updated at": "atualizado em",
+        "Showing": "A mostrar",
+        "results": "resultados",
+        "more than": "mais de",
 
       },
   },
