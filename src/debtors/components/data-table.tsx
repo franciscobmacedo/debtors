@@ -1,6 +1,6 @@
-"use client"
+"use client";
 
-import * as React from "react"
+import * as React from "react";
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -14,8 +14,8 @@ import {
   getPaginationRowModel,
   getSortedRowModel,
   useReactTable,
-  FilterFn
-} from "@tanstack/react-table"
+  FilterFn,
+} from "@tanstack/react-table";
 
 import {
   Table,
@@ -24,68 +24,53 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
-import {
-  rankItem,
-} from '@tanstack/match-sorter-utils'
+} from "@/components/ui/table";
+import { rankItem } from "@tanstack/match-sorter-utils";
 
-import { DataTablePagination } from "./data-table-pagination"
-import { DataTableToolbar } from "./data-table-toolbar"
-import {  Option } from "../schema";
+import { DataTablePagination } from "./data-table-pagination";
+import { DataTableToolbar } from "./data-table-toolbar";
+import { Option } from "../schema";
 import { useTranslation } from "react-i18next";
 
-
 interface DataTableProps<TData, TValue> {
-  columns: ColumnDef<TData, TValue>[]
-  data: TData[]
-  debtIntervals: Option[]
-  exportName: string
+  columns: ColumnDef<TData, TValue>[];
+  data: TData[];
+  debtIntervals: Option[];
+  exportName: string;
 }
-
 
 const fuzzyFilter: FilterFn<any> = (row, columnId, value, addMeta) => {
   // Rank the item
-  const itemRank = rankItem(row.getValue(columnId), value)
+  const itemRank = rankItem(row.getValue(columnId), value);
 
   // Store the itemRank info
   addMeta({
     itemRank,
-  })
+  });
 
   // Return if the item should be filtered in/out
-  return itemRank.passed
-}
-
+  return itemRank.passed;
+};
 
 export function DataTable<TData, TValue>({
   columns,
   data,
   debtIntervals,
-  exportName
+  exportName,
 }: DataTableProps<TData, TValue>) {
-  
   const [columnVisibility, setColumnVisibility] =
-    React.useState<VisibilityState>({
-      step: false 
-    })
+    React.useState<VisibilityState>({});
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
-  )
-  const [sorting, setSorting] = React.useState<SortingState>([])
-  const [globalFilter, setGlobalFilter] = React.useState('')
-
-  
+  );
+  const [sorting, setSorting] = React.useState<SortingState>([]);
+  const [globalFilter, setGlobalFilter] = React.useState("");
 
   const table = useReactTable({
     data,
     columns,
     filterFns: {
       fuzzy: fuzzyFilter,
-      
-    },
-    sortingFns: {
-      sortByStep: (rowA: any, rowB: any): number =>
-        rowA.getValue("step").value < rowB.getValue("step").value ? 1 : -1,
     },
     state: {
       sorting,
@@ -105,15 +90,26 @@ export function DataTable<TData, TValue>({
     getSortedRowModel: getSortedRowModel(),
     getFacetedRowModel: getFacetedRowModel(),
     getFacetedUniqueValues: getFacetedUniqueValues(),
-  })
+  });
 
   const { t } = useTranslation();
 
-
   return (
+    <>
+    <div>
+    
+    </div>
     <div className="space-y-4">
-     
-      <DataTableToolbar table={table} exportName={exportName} globalFilter={globalFilter} setGlobalFilter={setGlobalFilter} debtIntervals={debtIntervals} />
+      <DataTableToolbar
+        table={table}
+        exportName={exportName}
+        globalFilter={globalFilter}
+        setGlobalFilter={setGlobalFilter}
+        debtIntervals={debtIntervals}
+      />
+      <p className="text-xs text-neutral-600">
+      {t("Showing")}  {table.getFilteredRowModel().rows.length} {t("of")} {data.length} {t("results")}.
+      </p>
       <div className="rounded-md border">
         <Table>
           <TableHeader>
@@ -129,7 +125,7 @@ export function DataTable<TData, TValue>({
                             header.getContext()
                           )}
                     </TableHead>
-                  )
+                  );
                 })}
               </TableRow>
             ))}
@@ -137,9 +133,7 @@ export function DataTable<TData, TValue>({
           <TableBody>
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                >
+                <TableRow key={row.id}>
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>
                       {flexRender(
@@ -165,5 +159,6 @@ export function DataTable<TData, TValue>({
       </div>
       <DataTablePagination table={table} />
     </div>
-  )
+    </>
+  );
 }

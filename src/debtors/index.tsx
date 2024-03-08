@@ -16,6 +16,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import useSWR from "swr";
 import { useTranslation } from "react-i18next";
 import AutoProgress from "./auto-progress";
+import {stepAsCurrency} from "@/lib/utils";
 
 export default function DebtorsTable() {
   const { t } = useTranslation();
@@ -31,16 +32,23 @@ export default function DebtorsTable() {
 
   return (
     <>
-    <p className="font-light text-sm ">
-            {t("Debtors list to the Tax Authority. Data gathered from the")}
-              <a
-                href="https://static.portaldasfinancas.gov.pt/app/devedores_static/de-devedores.html"
-                target="_blank"
-                className="ml-1 font-semibold hover:underline underline-offset-2"
-              >
-                 {t("tax authority portal")}
-              </a>.
-          </p>
+      <p className="font-light text-sm ">
+        {t("Debtors list to the Tax Authority. Data gathered from the")}
+        <a
+          href="https://static.portaldasfinancas.gov.pt/app/devedores_static/de-devedores.html"
+          target="_blank"
+          className="ml-1 font-semibold hover:underline underline-offset-2"
+        >
+          {t("tax authority portal")}
+        </a>
+        .
+        <span className="text-xs text-neutral-600">
+          {" "}
+          {t("last updated at")}
+          {" "}
+          {data.last_updated}
+        </span>
+      </p>
       <div className="flex h-full flex-1 flex-col space-y-8 md:px-8 py-8">
         <Tabs defaultValue="colective" className="text-center">
           <TabsList className="mb-12">
@@ -59,6 +67,7 @@ export default function DebtorsTable() {
           </TabsList>
 
           <TabsContent value="colective" className="m-0">
+            
             <DataTable
               data={colectiveDebtorsData}
               columns={colectiveDebtorColumns}
@@ -94,7 +103,7 @@ const parseColectiveDebtors = (data: ColectiveDebtor[]) => {
     .parse(data)
     .sort((a, b) => a.step.start - b.step.start);
   const colectiveDebtIntervals = [
-    ...new Set(colectiveDebtorsData.map((item) => item.step_text)),
+    ...new Set(colectiveDebtorsData.map((item) => stepAsCurrency(item.step))),
   ].map((item) => {
     return {
       label: item,
@@ -110,7 +119,7 @@ const parseSingularDebtors = (data: SingularDebtor[]) => {
     .parse(data)
     .sort((a, b) => a.step.start - b.step.start);
   const singularDebtIntervals = [
-    ...new Set(singularDebtorsData.map((item) => item.step_text)),
+    ...new Set(singularDebtorsData.map((item) => stepAsCurrency(item.step))),
   ].map((item) => {
     return {
       label: item,

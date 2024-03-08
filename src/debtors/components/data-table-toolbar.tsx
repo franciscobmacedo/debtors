@@ -73,9 +73,9 @@ export function DataTableToolbar<TData>({
           className="h-8 w-full sm:w-64 lg:w-96"
           placeholder={t("Search all columns") + "..."}
         />
-        {table.getColumn("step_text") && (
+        {table.getColumn("step") && (
           <DataTableFacetedFilter
-            column={table.getColumn("step_text")}
+            column={table.getColumn("step")}
             title={t("Debt Intervals")}
             options={debtIntervals}
           />

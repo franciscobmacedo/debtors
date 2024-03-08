@@ -7,7 +7,6 @@ export const stepSchema = z.object({
 export const debtorSchema = z.object({
   name: z.string(),
   step: stepSchema,
-  step_text: z.string(),
 })
 export const singularDebtorSchema = debtorSchema.extend({
   nif: z.number(),
@@ -17,6 +16,7 @@ export const colectiveDebtorSchema = debtorSchema.extend({
 })
 
 export const DebtorResponseSchema = z.object({
+  last_updated: z.string(),
   singular_debtors: z.array(singularDebtorSchema),
   colective_debtors: z.array(colectiveDebtorSchema),
 })
