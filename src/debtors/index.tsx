@@ -92,7 +92,7 @@ export default function DebtorsTable() {
 const getData = () => {
   const fetcher = (url: string) => fetch(url).then((res) => res.json());
   const url =
-    "https://raw.githubusercontent.com/franciscobmacedo/devedores-scraper/main/data/debtors.json";
+    "https://raw.githubusercontent.com/franciscobmacedo/debtors-scraper/main/data/debtors.json";
   const { data, error } = useSWR<DebtorResponse>(url, fetcher);
   return { data, error };
 };
