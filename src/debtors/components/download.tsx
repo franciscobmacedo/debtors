@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { Table } from "@tanstack/react-table";
 
 import { Button } from "@/components/ui/button";
+import { stepAsCurrency } from "@/lib/utils";
 
 interface ExportProps<TData> {
   table: Table<TData>;
@@ -23,7 +24,11 @@ export function Download<TData>({ table, exportName }: ExportProps<TData>) {
     return;
   };
   return (
-    <Button variant="ghost" className="h-8 px-2 lg:px-3 text-xs" onClick={downloadData}>
+    <Button
+      variant="ghost"
+      className="h-8 px-2 lg:px-3 text-xs"
+      onClick={downloadData}
+    >
       <DownloadIcon className="mr-2 h-4 w-4" />
       {t("Export")}
     </Button>
@@ -52,10 +57,17 @@ function getData<TData>(table: Table<TData>) {
     return Object.keys(columns).reduce((acc, key) => {
       // check if the key is in the data
       if (key in dataRow) {
-        acc[columns[key]] = dataRow[key];
+        if (key === "step") {
+          // use stepAsCurrency if the key is step
+          acc[columns[key]] = stepAsCurrency(dataRow[key]);
+
+          
+        } else {
+          acc[columns[key]] = dataRow[key];
+        }
       }
       return acc;
-    }, {} as { [key: string]: object });
+    }, {} as { [key: string]: string });
   });
   return data;
 }
