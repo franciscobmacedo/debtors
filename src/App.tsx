@@ -39,6 +39,9 @@ function App() {
           <DebtorsTable />
         </div>
       </div>
+      <div className="text-center text-xs text-neutral-600 mt-20 sm:mt-5 mb-5">
+        <p>made with  <span className="text-red-500">♥</span> by <a className="underline" target="_blank" href="https://fmacedo.com/">fmacedo</a></p>
+      </div>
     </>
   );
 }
