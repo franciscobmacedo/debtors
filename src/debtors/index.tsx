@@ -17,6 +17,7 @@ import useSWR from "swr";
 import { useTranslation } from "react-i18next";
 import AutoProgress from "./auto-progress";
 import { stepAsCurrency } from "@/lib/utils";
+import Footer from "./components/footer";
 
 export default function DebtorsTable() {
   const { t } = useTranslation();
@@ -37,20 +38,8 @@ export default function DebtorsTable() {
 
   return (
     <>
-      <p className="font-light text-sm ">
-        {t("Debtors list to the Tax Authority. Data gathered from the")}
-        <a
-          href="https://static.portaldasfinancas.gov.pt/app/devedores_static/de-devedores.html"
-          target="_blank"
-          className="ml-1 font-semibold hover:underline underline-offset-2"
-        >
-          {t("tax authority portal")}
-        </a>
-        .
-        <span className="text-xs text-neutral-600">
-          {" "}
-          {t("last updated at")} {data.last_updated}
-        </span>
+      <p className="text-xs text-neutral-600">
+        {t("last updated at")} {data.last_updated}
       </p>
       <div className="flex h-full flex-1 flex-col space-y-8 md:px-8 py-8">
         <Tabs defaultValue="colective" className="text-center">
@@ -76,13 +65,13 @@ export default function DebtorsTable() {
               debtIntervals={colectiveDebtIntervals}
               exportName={t("Colective Debtors")}
             />
-              <iframe
-                height={800}
-                className="w-full"
-                title="Dívidas à AT - Empresas"
-                src="https://app.powerbi.com/view?r=eyJrIjoiMzliZjU4ZTItMmJkYy00MTUzLTg2OGMtOWQzYjRjNDJlMmEzIiwidCI6IjkyNzQyZWFlLWExMTktNDNmYi1hOTU2LWQ3ZGVmNzQ0ODgxYSIsImMiOjh9"
-                allowFullScreen={true}
-              ></iframe>
+            <iframe
+              height={800}
+              className="w-full"
+              title="Dívidas à AT - Empresas"
+              src="https://app.powerbi.com/view?r=eyJrIjoiMzliZjU4ZTItMmJkYy00MTUzLTg2OGMtOWQzYjRjNDJlMmEzIiwidCI6IjkyNzQyZWFlLWExMTktNDNmYi1hOTU2LWQ3ZGVmNzQ0ODgxYSIsImMiOjh9"
+              allowFullScreen={true}
+            ></iframe>
           </TabsContent>
           <TabsContent value="singular" className="m-0">
             <DataTable
@@ -101,6 +90,7 @@ export default function DebtorsTable() {
           </TabsContent>
         </Tabs>
       </div>
+      <Footer />
     </>
   );
 }
