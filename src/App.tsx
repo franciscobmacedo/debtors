@@ -2,7 +2,7 @@ import DebtorsTable from "@/debtors";
 import { useTranslation } from "react-i18next";
 import { Button } from "./components/ui/button";
 
-function App() {
+function App({ withCharts }: { withCharts: boolean }) {
   const { t, i18n } = useTranslation();
   const changeLanguage = (lng: string) => {
     localStorage.setItem("i18nextLng", lng);
@@ -35,7 +35,7 @@ function App() {
           </div>
         </div>
         <div className="flex flex-col flex-1 justify-center text-center">
-          <DebtorsTable />
+          <DebtorsTable withCharts={withCharts} />
         </div>
       </div>
     </>

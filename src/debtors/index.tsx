@@ -19,7 +19,7 @@ import AutoProgress from "./auto-progress";
 import { stepAsCurrency } from "@/lib/utils";
 import Footer from "./components/footer";
 
-export default function DebtorsTable() {
+export default function DebtorsTable({ withCharts }: { withCharts: boolean }) {
   const { t } = useTranslation();
   const { data, error } = getData();
   if (error) return <div>Failed to load</div>;
@@ -65,13 +65,15 @@ export default function DebtorsTable() {
               debtIntervals={colectiveDebtIntervals}
               exportName={t("Colective Debtors")}
             />
-            <iframe
-              height={800}
-              className="w-full"
-              title="Dívidas à AT - Empresas"
-              src="https://app.powerbi.com/view?r=eyJrIjoiMzliZjU4ZTItMmJkYy00MTUzLTg2OGMtOWQzYjRjNDJlMmEzIiwidCI6IjkyNzQyZWFlLWExMTktNDNmYi1hOTU2LWQ3ZGVmNzQ0ODgxYSIsImMiOjh9"
-              allowFullScreen={true}
-            ></iframe>
+            {withCharts && (
+              <iframe
+                height={800}
+                className="w-full"
+                title="Dívidas à AT - Empresas"
+                src="https://app.powerbi.com/view?r=eyJrIjoiMzliZjU4ZTItMmJkYy00MTUzLTg2OGMtOWQzYjRjNDJlMmEzIiwidCI6IjkyNzQyZWFlLWExMTktNDNmYi1hOTU2LWQ3ZGVmNzQ0ODgxYSIsImMiOjh9"
+                allowFullScreen={true}
+              ></iframe>
+            )}
           </TabsContent>
           <TabsContent value="singular" className="m-0">
             <DataTable
@@ -80,13 +82,15 @@ export default function DebtorsTable() {
               debtIntervals={singularDebtIntervals}
               exportName={t("Singular Debtors")}
             />
-            <iframe
-              title="Dívidas à AT - Pessoas"
-              height={800}
-              className="w-full"
-              src="https://app.powerbi.com/view?r=eyJrIjoiYjQ5NWU1ZGUtNTNjMS00ZGI4LWExNzItMTcyOGZkOGViODI4IiwidCI6IjkyNzQyZWFlLWExMTktNDNmYi1hOTU2LWQ3ZGVmNzQ0ODgxYSIsImMiOjh9"
-              allowFullScreen={true}
-            ></iframe>
+            {withCharts && (
+              <iframe
+                title="Dívidas à AT - Pessoas"
+                height={800}
+                className="w-full"
+                src="https://app.powerbi.com/view?r=eyJrIjoiYjQ5NWU1ZGUtNTNjMS00ZGI4LWExNzItMTcyOGZkOGViODI4IiwidCI6IjkyNzQyZWFlLWExMTktNDNmYi1hOTU2LWQ3ZGVmNzQ0ODgxYSIsImMiOjh9"
+                allowFullScreen={true}
+              ></iframe>
+            )}
           </TabsContent>
         </Tabs>
       </div>
