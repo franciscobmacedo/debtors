@@ -12,13 +12,13 @@ interface ExportProps<TData> {
 }
 
 export function Download<TData>({ table, exportName }: ExportProps<TData>) {
-  const data = getData(table);
   const { t } = useTranslation();
   const config = mkConfig({
     useKeysAsHeaders: true,
     filename: exportName,
   });
   const downloadData = async () => {
+    const data = getData(table);
     const csv = generateCsv(config)(data);
     download(config)(csv);
     return;
