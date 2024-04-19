@@ -17,7 +17,6 @@ import useSWR from "swr";
 import { useTranslation } from "react-i18next";
 import AutoProgress from "./auto-progress";
 import { stepAsCurrency } from "@/lib/utils";
-import Footer from "./components/footer";
 
 export default function DebtorsTable({ withCharts }: { withCharts: boolean }) {
   const { t } = useTranslation();
@@ -94,7 +93,7 @@ export default function DebtorsTable({ withCharts }: { withCharts: boolean }) {
           </TabsContent>
         </Tabs>
       </div>
-      <Footer />
+      
     </>
   );
 }

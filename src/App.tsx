@@ -1,8 +1,15 @@
 import DebtorsTable from "@/debtors";
 import { useTranslation } from "react-i18next";
 import { Button } from "./components/ui/button";
+import Footer from "@/debtors/components/footer";
 
-function App({ withCharts }: { withCharts: boolean }) {
+function App({
+  withCharts,
+  withFooter,
+}: {
+  withCharts: boolean;
+  withFooter: boolean;
+}) {
   const { t, i18n } = useTranslation();
   const changeLanguage = (lng: string) => {
     localStorage.setItem("i18nextLng", lng);
@@ -36,6 +43,7 @@ function App({ withCharts }: { withCharts: boolean }) {
         </div>
         <div className="flex flex-col flex-1 justify-center text-center">
           <DebtorsTable withCharts={withCharts} />
+          {withFooter && <Footer />}
         </div>
       </div>
     </>
