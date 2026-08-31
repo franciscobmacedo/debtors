@@ -1,4 +1,5 @@
 import "./style.css";
+import uFuzzy from "@leeoniya/ufuzzy";
 
 const DATA_URL =
   "https://raw.githubusercontent.com/franciscobmacedo/debtors-scraper/main/data/debtors.json";
@@ -228,14 +229,29 @@ function syncControls() {
     .forEach((b) => b.classList.toggle("active", b.dataset.kind === state.kind));
 }
 
+// Typo-tolerant search: allows one insertion/deletion/substitution/transposition
+// inside each term, so "jime" finds JAIME and "alxandre" finds ALEXANDRE.
+// Terms can appear in any order ("antonio joao" finds JOÃO ANTONIO).
+const uf = new uFuzzy({ intraMode: 1, intraIns: 1, intraSub: 1, intraTrn: 1, intraDel: 1 });
+let haystack: string[] = [];
+
+function searchNames(q: string): Debtor[] {
+  const [idxs, info, order] = uf.search(haystack, q, 1);
+  if (!idxs || idxs.length === 0) return [];
+  // When ranking info is available, use relevance order; otherwise raw match order.
+  if (info && order) return order.map((i) => debtors[info.idx[i]]);
+  return Array.from(idxs, (i) => debtors[i]);
+}
+
 function filtered(): Debtor[] {
   const q = normalize(state.query.trim());
   const isNum = /^\d+$/.test(q);
-  let out = debtors.filter((d) => {
+  const base = !q || isNum ? debtors : searchNames(q);
+  let out = base.filter((d) => {
     if (state.kind !== "todos" && d.kind !== state.kind) return false;
     if (state.stepKey && stepKey(d.step) !== state.stepKey) return false;
-    if (!q) return true;
-    return isNum ? d.idStr.startsWith(q) : d.q.includes(q);
+    if (isNum) return d.idStr.startsWith(q);
+    return true;
   });
   if (state.sort === "name") out = out.slice().sort((a, b) => a.q.localeCompare(b.q));
   else if (state.sort === "debt-desc") out = out.slice().sort((a, b) => b.step.start - a.step.start);
@@ -344,6 +360,7 @@ async function load() {
       ...data.colective_debtors.map((d) => mk(d, "empresa", d.nipc!)),
       ...data.singular_debtors.map((d) => mk(d, "pessoa", d.nif!)),
     ];
+    haystack = debtors.map((d) => d.q);
 
     const totals = document.getElementById("totals");
     if (totals)
