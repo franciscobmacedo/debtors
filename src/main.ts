@@ -75,6 +75,7 @@ const state: State = {
 
 interface CompanyInfo {
   slug?: string;
+  estado?: string;
   nome?: string;
   morada?: string;
   concelho?: string;
@@ -530,13 +531,14 @@ async function renderCompany(nipc: number) {
   const box = document.getElementById("company-info");
   if (!box) return;
   if (!info || !info.slug) {
-    box.innerHTML = `<p class="empty">Sem dados adicionais disponíveis (ainda).</p>`;
+    box.innerHTML = `<p class="empty">Ainda não recolhemos os dados desta empresa — a recolha de todas as empresas está em curso. Entretanto, consulte-a diretamente no Racius pelo link abaixo.</p>`;
     return;
   }
   if (info.nome) document.title = `${info.nome} — Devedores ao Estado`;
   const link = document.getElementById("racius-link") as HTMLAnchorElement;
   link.href = `https://www.racius.com/${info.slug}/`;
   const rows: [string, string | undefined][] = [
+    ["Estado", info.estado],
     ["Nome oficial", info.nome],
     ["Morada", info.morada],
     ["Concelho", info.concelho && info.distrito ? `${info.concelho} (${info.distrito})` : info.concelho],
