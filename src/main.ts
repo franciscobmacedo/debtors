@@ -319,7 +319,11 @@ function renderRows() {
             (d) => `
           <tr>
             <td class="col-id">${d.id}</td>
-            <td class="col-name">${escapeHtml(d.name)}<span class="kind-tag">${d.kind} · ${SOURCE_LABEL[d.source]}</span></td>
+            <td class="col-name">${escapeHtml(d.name)}<span class="kind-tag">${d.kind} · ${SOURCE_LABEL[d.source]}</span>${
+              d.kind === "empresa"
+                ? ` <a class="ext-link" href="https://www.racius.com/empresas-em-portugal/?q=${d.id}" target="_blank" rel="noopener nofollow">Racius ↗</a>`
+                : ""
+            }</td>
             <td class="col-step"><span class="step-badge s${severity(d.step)}">${stepLabel(d.step)}</span></td>
           </tr>`,
           )

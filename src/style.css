@@ -257,6 +257,19 @@ body {
   color: var(--n500);
 }
 
+.ext-link {
+  margin-left: 0.5rem;
+  font-size: 0.6875rem;
+  color: var(--n500);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  white-space: nowrap;
+}
+
+.ext-link:hover {
+  color: var(--n900);
+}
+
 .col-step {
   white-space: nowrap;
   width: 11rem;
