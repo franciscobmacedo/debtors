@@ -3,6 +3,8 @@ import uFuzzy from "@leeoniya/ufuzzy";
 
 const DATA_URL =
   "https://raw.githubusercontent.com/franciscobmacedo/debtors-scraper/main/data/debtors.json";
+const SS_DATA_URL =
+  "https://raw.githubusercontent.com/franciscobmacedo/debtors-scraper/main/data/ss-debtors.json";
 
 const CHARTS = [
   {
@@ -34,11 +36,15 @@ interface ApiResponse {
 }
 
 type Kind = "empresa" | "pessoa";
+type Source = "at" | "ss";
+
+const SOURCE_LABEL: Record<Source, string> = { at: "Fisco", ss: "Seg. Social" };
 
 interface Debtor {
   name: string;
   id: number; // NIF or NIPC
   kind: Kind;
+  source: Source;
   step: Step;
   /** normalized (lowercase, accent-stripped) name for searching */
   q: string;
@@ -48,6 +54,7 @@ interface Debtor {
 interface State {
   query: string;
   kind: Kind | "todos";
+  source: Source | "todas";
   stepKey: string; // "" = all, otherwise "start-end"
   sort: "none" | "name" | "debt-desc" | "debt-asc";
   shown: number;
@@ -55,7 +62,14 @@ interface State {
 
 const PAGE = 100;
 
-const state: State = { query: "", kind: "todos", stepKey: "", sort: "none", shown: PAGE };
+const state: State = {
+  query: "",
+  kind: "todos",
+  source: "todas",
+  stepKey: "",
+  sort: "none",
+  shown: PAGE,
+};
 
 let debtors: Debtor[] = [];
 let lastUpdated = "";
@@ -101,6 +115,11 @@ function render() {
             <button data-kind="empresa" class="chip">Empresas</button>
             <button data-kind="pessoa" class="chip">Pessoas</button>
           </div>
+          <div class="chip-group" id="source-chips" role="radiogroup" aria-label="Fonte">
+            <button data-source="todas" class="chip">Ambas</button>
+            <button data-source="at" class="chip">Fisco</button>
+            <button data-source="ss" class="chip">Seg. Social</button>
+          </div>
           <select id="step-select" aria-label="Escalão de dívida"></select>
           <select id="sort-select" aria-label="Ordenação">
             <option value="none">Ordem original</option>
@@ -126,7 +145,7 @@ function render() {
 function header() {
   return `
     <header class="masthead">
-      <h1>Devedores ao Fisco</h1>
+      <h1>Devedores ao Estado</h1>
       <p class="meta" id="totals">A carregar…</p>
     </header>
   `;
@@ -152,14 +171,17 @@ function footer() {
   return `
     <footer class="site-footer">
       <p>
-        Toda a informação nesta página provém dos dados públicos divulgados pela
+        Toda a informação nesta página provém das listas públicas divulgadas pela
         <a href="https://static.portaldasfinancas.gov.pt/app/devedores_static/de-devedores.html" target="_blank" rel="noopener">Autoridade Tributária (AT)</a>
-        e não sofre qualquer alteração da nossa parte. Os dados apresentados são da exclusiva responsabilidade da AT;
-        qualquer inconsistência deverá ser-lhe reportada diretamente.
+        e pela
+        <a href="https://www.seg-social.pt/ptss/sef/lista-devedores/consulta-lista-devedores" target="_blank" rel="noopener">Segurança Social</a>,
+        e não sofre qualquer alteração da nossa parte. Os dados apresentados são da exclusiva responsabilidade dessas
+        entidades; qualquer inconsistência deverá ser-lhes reportada diretamente.
       </p>
       <p>
         Dados em bruto:
-        <a href="${DATA_URL}" target="_blank" rel="noopener">debtors.json</a>
+        <a href="${DATA_URL}" target="_blank" rel="noopener">debtors.json</a> ·
+        <a href="${SS_DATA_URL}" target="_blank" rel="noopener">ss-debtors.json</a>
         · Código:
         <a href="https://github.com/franciscobmacedo/debtors" target="_blank" rel="noopener">frontend</a> /
         <a href="https://github.com/franciscobmacedo/debtors-scraper" target="_blank" rel="noopener">scraper</a>
@@ -187,6 +209,16 @@ function bind() {
   document.querySelectorAll<HTMLButtonElement>("#kind-chips .chip").forEach((btn) =>
     btn.addEventListener("click", () => {
       state.kind = btn.dataset.kind as State["kind"];
+      state.shown = PAGE;
+      buildStepOptions();
+      syncControls();
+      update();
+    }),
+  );
+
+  document.querySelectorAll<HTMLButtonElement>("#source-chips .chip").forEach((btn) =>
+    btn.addEventListener("click", () => {
+      state.source = btn.dataset.source as State["source"];
       state.shown = PAGE;
       buildStepOptions();
       syncControls();
@@ -227,7 +259,14 @@ function syncControls() {
   document
     .querySelectorAll<HTMLButtonElement>("#kind-chips .chip")
     .forEach((b) => b.classList.toggle("active", b.dataset.kind === state.kind));
+  document
+    .querySelectorAll<HTMLButtonElement>("#source-chips .chip")
+    .forEach((b) => b.classList.toggle("active", b.dataset.source === state.source));
 }
+
+const matchesFacets = (d: Debtor) =>
+  (state.kind === "todos" || d.kind === state.kind) &&
+  (state.source === "todas" || d.source === state.source);
 
 // Typo-tolerant search: allows one insertion/deletion/substitution/transposition
 // inside each term, so "jime" finds JAIME and "alxandre" finds ALEXANDRE.
@@ -248,7 +287,7 @@ function filtered(): Debtor[] {
   const isNum = /^\d+$/.test(q);
   const base = !q || isNum ? debtors : searchNames(q);
   let out = base.filter((d) => {
-    if (state.kind !== "todos" && d.kind !== state.kind) return false;
+    if (!matchesFacets(d)) return false;
     if (state.stepKey && stepKey(d.step) !== state.stepKey) return false;
     if (isNum) return d.idStr.startsWith(q);
     return true;
@@ -280,7 +319,7 @@ function renderRows() {
             (d) => `
           <tr>
             <td class="col-id">${d.id}</td>
-            <td class="col-name">${escapeHtml(d.name)}<span class="kind-tag ${d.kind}">${d.kind}</span></td>
+            <td class="col-name">${escapeHtml(d.name)}<span class="kind-tag">${d.kind} · ${SOURCE_LABEL[d.source]}</span></td>
             <td class="col-step"><span class="step-badge s${severity(d.step)}">${stepLabel(d.step)}</span></td>
           </tr>`,
           )
@@ -306,8 +345,8 @@ function escapeHtml(s: string) {
 
 function exportCsv() {
   const rows = [
-    ["numero", "nome", "tipo", "divida"],
-    ...current.map((d) => [String(d.id), d.name, d.kind, stepLabel(d.step)]),
+    ["numero", "nome", "tipo", "fonte", "divida"],
+    ...current.map((d) => [String(d.id), d.name, d.kind, SOURCE_LABEL[d.source], stepLabel(d.step)]),
   ];
   const csv = rows
     .map((r) => r.map((c) => `"${c.replace(/"/g, '""')}"`).join(","))
@@ -326,7 +365,7 @@ function buildStepOptions() {
   const select = document.getElementById("step-select") as HTMLSelectElement;
   const seen = new Map<string, Step>();
   for (const d of debtors) {
-    if (state.kind !== "todos" && d.kind !== state.kind) continue;
+    if (!matchesFacets(d)) continue;
     const k = stepKey(d.step);
     if (!seen.has(k)) seen.set(k, d.step);
   }
@@ -343,30 +382,51 @@ async function load() {
   const results = document.getElementById("results")!;
   results.innerHTML = `<p class="loading">A carregar ${embed ? "" : "os cerca de 54 mil "}registos…</p>`;
   try {
-    const res = await fetch(DATA_URL);
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data: ApiResponse = await res.json();
-    lastUpdated = data.last_updated;
+    const fetchJson = async (url: string): Promise<ApiResponse | null> => {
+      try {
+        const res = await fetch(url);
+        if (!res.ok) return null;
+        return await res.json();
+      } catch {
+        return null;
+      }
+    };
+    const [at, ss] = await Promise.all([fetchJson(DATA_URL), fetchJson(SS_DATA_URL)]);
+    if (!at && !ss) throw new Error("no data");
+    lastUpdated = at?.last_updated ?? ss?.last_updated ?? "";
 
-    const mk = (raw: RawDebtor, kind: Kind, id: number): Debtor => ({
+    const mk = (raw: RawDebtor, kind: Kind, source: Source, id: number): Debtor => ({
       name: raw.name,
       id,
       kind,
+      source,
       step: raw.step,
       q: normalize(raw.name),
       idStr: String(id),
     });
-    debtors = [
-      ...data.colective_debtors.map((d) => mk(d, "empresa", d.nipc!)),
-      ...data.singular_debtors.map((d) => mk(d, "pessoa", d.nif!)),
+    const fromApi = (data: ApiResponse, source: Source): Debtor[] => [
+      ...data.colective_debtors.map((d) => mk(d, "empresa", source, d.nipc!)),
+      ...data.singular_debtors.map((d) => mk(d, "pessoa", source, d.nif!)),
     ];
+    debtors = [...(at ? fromApi(at, "at") : []), ...(ss ? fromApi(ss, "ss") : [])];
     haystack = debtors.map((d) => d.q);
 
     const totals = document.getElementById("totals");
-    if (totals)
-      totals.innerHTML = `<strong>${fmtInt(data.colective_debtors.length)}</strong> empresas · <strong>${fmtInt(
-        data.singular_debtors.length,
-      )}</strong> pessoas · atualizada em ${lastUpdated}`;
+    if (totals) {
+      const empresas = debtors.filter((d) => d.kind === "empresa").length;
+      const pessoas = debtors.length - empresas;
+      const updates = [
+        at ? `Fisco a ${at.last_updated}` : null,
+        ss ? `Seg. Social a ${ss.last_updated}` : null,
+      ]
+        .filter(Boolean)
+        .join(", ");
+      totals.innerHTML = `<strong>${fmtInt(empresas)}</strong> empresas · <strong>${fmtInt(
+        pessoas,
+      )}</strong> pessoas · atualizado: ${updates}`;
+    }
+    // Hide the source filter until the SS dataset actually exists.
+    if (!ss || !at) document.getElementById("source-chips")?.remove();
     buildStepOptions();
     update();
   } catch (err) {

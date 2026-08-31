@@ -1,8 +1,8 @@
-# Devedores ao Fisco
+# Devedores ao Estado
 
 https://debtors.fmacedo.com
 
-The Portuguese Tax Authority (AT) publishes its list of debtors — companies and individuals — as a set of PDFs. This app makes that data actually browsable: instant accent-insensitive search by name or NIF/NIPC, filtering by type and debt bracket, sorting, and CSV export.
+Portugal publishes two public debtors lists — the Tax Authority (AT/Fisco) and Segurança Social. This app makes them actually browsable in one place: instant accent-insensitive search by name or NIF/NIPC, filtering by type and debt bracket, sorting, and CSV export.
 
 It reads from a JSON file updated daily by the [debtors-scraper](https://github.com/franciscobmacedo/debtors-scraper):
 
