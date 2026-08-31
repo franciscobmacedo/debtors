@@ -388,7 +388,11 @@ function renderRows() {
           .map(
             (d) => `
           <tr>
-            <td class="col-id">${d.id}</td>
+            <td class="col-id">${
+              d.kind === "empresa"
+                ? `<a class="row-link" href="/empresa/${d.id}">${d.id}</a>`
+                : d.id
+            }</td>
             <td class="col-name">${
               d.kind === "empresa"
                 ? `<a class="row-link" href="/empresa/${d.id}">${escapeHtml(d.name)}</a>`
