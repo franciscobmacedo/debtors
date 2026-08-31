@@ -5,6 +5,8 @@ const DATA_URL =
   "https://raw.githubusercontent.com/franciscobmacedo/debtors-scraper/main/data/debtors.json";
 const SS_DATA_URL =
   "https://raw.githubusercontent.com/franciscobmacedo/debtors-scraper/main/data/ss-debtors.json";
+const COMPANIES_BASE =
+  "https://raw.githubusercontent.com/franciscobmacedo/debtors-scraper/main/data/companies/";
 
 const CHARTS = [
   {
@@ -71,11 +73,77 @@ const state: State = {
   shown: PAGE,
 };
 
+interface CompanyInfo {
+  slug?: string;
+  nome?: string;
+  morada?: string;
+  concelho?: string;
+  distrito?: string;
+  forma?: string;
+  capital?: string;
+  cae?: string;
+  cae_desc?: string;
+  checked?: string;
+}
+
 let debtors: Debtor[] = [];
 let lastUpdated = "";
+let loaded = false;
 
 const app = document.getElementById("app")!;
 const embed = location.pathname.replace(/\/$/, "") === "/table";
+
+// ---------- routing ----------
+
+type Route = { view: "list" } | { view: "company"; nipc: number };
+
+function currentRoute(): Route {
+  const m = location.pathname.match(/^\/empresa\/(\d{9})\/?$/);
+  return m ? { view: "company", nipc: Number(m[1]) } : { view: "list" };
+}
+
+function navigate(path: string) {
+  history.pushState({}, "", path);
+  renderRoute();
+  scrollTo(0, 0);
+}
+
+window.addEventListener("popstate", renderRoute);
+
+function renderRoute() {
+  const route = currentRoute();
+  if (route.view === "company") {
+    renderCompany(route.nipc);
+  } else {
+    document.title = "Devedores ao Estado — listas públicas de devedores ao Fisco e à Segurança Social";
+    render();
+    if (loaded) {
+      buildStepOptions();
+      renderTotals();
+      update();
+    } else {
+      document.getElementById("results")!.innerHTML =
+        `<p class="loading">A carregar os registos…</p>`;
+    }
+  }
+}
+
+// ---------- company data shards ----------
+
+const shardCache = new Map<string, Record<string, CompanyInfo>>();
+
+async function companyInfo(nipc: number): Promise<CompanyInfo | null> {
+  const prefix = String(nipc).slice(0, 4);
+  if (!shardCache.has(prefix)) {
+    try {
+      const res = await fetch(`${COMPANIES_BASE}${prefix}.json`);
+      shardCache.set(prefix, res.ok ? await res.json() : {});
+    } catch {
+      shardCache.set(prefix, {});
+    }
+  }
+  return shardCache.get(prefix)![String(nipc)] ?? null;
+}
 
 const normalize = (s: string) =>
   s
@@ -196,6 +264,7 @@ function footer() {
 
 function bind() {
   const q = document.getElementById("q") as HTMLInputElement;
+  q.value = state.query; // survives navigating to a company page and back
   let t: number | undefined;
   q.addEventListener("input", () => {
     clearTimeout(t);
@@ -319,11 +388,11 @@ function renderRows() {
             (d) => `
           <tr>
             <td class="col-id">${d.id}</td>
-            <td class="col-name">${escapeHtml(d.name)}<span class="kind-tag">${d.kind} · ${SOURCE_LABEL[d.source]}</span>${
+            <td class="col-name">${
               d.kind === "empresa"
-                ? ` <a class="ext-link" href="https://www.racius.com/empresas-em-portugal/?q=${d.id}" target="_blank" rel="noopener nofollow">Racius ↗</a>`
-                : ""
-            }</td>
+                ? `<a class="row-link" href="/empresa/${d.id}">${escapeHtml(d.name)}</a>`
+                : escapeHtml(d.name)
+            }<span class="kind-tag">${d.kind} · ${SOURCE_LABEL[d.source]}</span></td>
             <td class="col-step"><span class="step-badge s${severity(d.step)}">${stepLabel(d.step)}</span></td>
           </tr>`,
           )
@@ -341,6 +410,13 @@ function renderRows() {
     state.shown += PAGE * 5;
     renderRows();
   });
+  results.querySelectorAll<HTMLAnchorElement>("a.row-link").forEach((a) =>
+    a.addEventListener("click", (e) => {
+      if (e.metaKey || e.ctrlKey || e.shiftKey) return; // allow open-in-new-tab
+      e.preventDefault();
+      navigate(a.getAttribute("href")!);
+    }),
+  );
 }
 
 function escapeHtml(s: string) {
@@ -381,10 +457,101 @@ function buildStepOptions() {
   select.value = state.stepKey;
 }
 
+let atData: ApiResponse | null = null;
+let ssData: ApiResponse | null = null;
+
+function renderTotals() {
+  const totals = document.getElementById("totals");
+  if (!totals || !loaded) return;
+  const empresas = debtors.filter((d) => d.kind === "empresa").length;
+  const pessoas = debtors.length - empresas;
+  const updates = [
+    atData ? `Fisco a ${atData.last_updated}` : null,
+    ssData ? `Seg. Social a ${ssData.last_updated}` : null,
+  ]
+    .filter(Boolean)
+    .join(", ");
+  totals.innerHTML = `<strong>${fmtInt(empresas)}</strong> empresas · <strong>${fmtInt(
+    pessoas,
+  )}</strong> pessoas · atualizado: ${updates}`;
+  // Hide the source filter until both datasets actually exist.
+  if (!ssData || !atData) document.getElementById("source-chips")?.remove();
+}
+
+async function renderCompany(nipc: number) {
+  const back = `<a class="back-link" href="/" id="back">← Devedores ao Estado</a>`;
+  if (!loaded) {
+    app.innerHTML = `<main class="wrap company">${back}<p class="loading">A carregar…</p></main>`;
+    return;
+  }
+  const entries = debtors.filter((d) => d.kind === "empresa" && d.id === nipc);
+  const listName = entries[0]?.name ?? `NIPC ${nipc}`;
+  document.title = `${listName} — Devedores ao Estado`;
+
+  const debtsHtml = entries.length
+    ? `<table class="results-table">
+        <thead><tr><th>Fonte</th><th class="col-step">Dívida</th></tr></thead>
+        <tbody>${entries
+          .map(
+            (d) => `<tr>
+              <td>${SOURCE_LABEL[d.source]}</td>
+              <td class="col-step"><span class="step-badge s${severity(d.step)}">${stepLabel(d.step)}</span></td>
+            </tr>`,
+          )
+          .join("")}</tbody>
+      </table>`
+    : `<p class="empty">Sem registos de dívida nas listas atuais.</p>`;
+
+  app.innerHTML = `
+    <main class="wrap company">
+      ${back}
+      <h1 class="company__name">${escapeHtml(listName)}</h1>
+      <p class="meta">NIPC <span class="mono">${nipc}</span></p>
+      <section class="company__section">
+        <h2>Dívidas</h2>
+        <div class="panel">${debtsHtml}</div>
+      </section>
+      <section class="company__section">
+        <h2>Dados públicos da empresa</h2>
+        <div class="panel" id="company-info"><p class="loading">A carregar…</p></div>
+        <p class="charts-note">Via <a id="racius-link" href="https://www.racius.com/empresas-em-portugal/?q=${nipc}" target="_blank" rel="noopener nofollow">Racius ↗</a></p>
+      </section>
+    </main>
+  `;
+  document.getElementById("back")!.addEventListener("click", (e) => {
+    if ((e as MouseEvent).metaKey || (e as MouseEvent).ctrlKey) return;
+    e.preventDefault();
+    navigate("/");
+  });
+
+  const info = await companyInfo(nipc);
+  // bail out if the user navigated away while the shard was loading
+  if (currentRoute().view !== "company") return;
+  const box = document.getElementById("company-info");
+  if (!box) return;
+  if (!info || !info.slug) {
+    box.innerHTML = `<p class="empty">Sem dados adicionais disponíveis (ainda).</p>`;
+    return;
+  }
+  if (info.nome) document.title = `${info.nome} — Devedores ao Estado`;
+  const link = document.getElementById("racius-link") as HTMLAnchorElement;
+  link.href = `https://www.racius.com/${info.slug}/`;
+  const rows: [string, string | undefined][] = [
+    ["Nome oficial", info.nome],
+    ["Morada", info.morada],
+    ["Concelho", info.concelho && info.distrito ? `${info.concelho} (${info.distrito})` : info.concelho],
+    ["Forma jurídica", info.forma],
+    ["Capital social", info.capital],
+    ["CAE", info.cae ? `${info.cae}${info.cae_desc ? ` — ${info.cae_desc}` : ""}` : undefined],
+  ];
+  box.innerHTML = `<dl class="company__facts">${rows
+    .filter(([, v]) => v)
+    .map(([k, v]) => `<dt>${k}</dt><dd>${escapeHtml(v!)}</dd>`)
+    .join("")}</dl>`;
+}
+
 async function load() {
-  render();
-  const results = document.getElementById("results")!;
-  results.innerHTML = `<p class="loading">A carregar ${embed ? "" : "os cerca de 54 mil "}registos…</p>`;
+  renderRoute();
   try {
     const fetchJson = async (url: string): Promise<ApiResponse | null> => {
       try {
@@ -397,6 +564,8 @@ async function load() {
     };
     const [at, ss] = await Promise.all([fetchJson(DATA_URL), fetchJson(SS_DATA_URL)]);
     if (!at && !ss) throw new Error("no data");
+    atData = at;
+    ssData = ss;
     lastUpdated = at?.last_updated ?? ss?.last_updated ?? "";
 
     const mk = (raw: RawDebtor, kind: Kind, source: Source, id: number): Debtor => ({
@@ -414,27 +583,12 @@ async function load() {
     ];
     debtors = [...(at ? fromApi(at, "at") : []), ...(ss ? fromApi(ss, "ss") : [])];
     haystack = debtors.map((d) => d.q);
-
-    const totals = document.getElementById("totals");
-    if (totals) {
-      const empresas = debtors.filter((d) => d.kind === "empresa").length;
-      const pessoas = debtors.length - empresas;
-      const updates = [
-        at ? `Fisco a ${at.last_updated}` : null,
-        ss ? `Seg. Social a ${ss.last_updated}` : null,
-      ]
-        .filter(Boolean)
-        .join(", ");
-      totals.innerHTML = `<strong>${fmtInt(empresas)}</strong> empresas · <strong>${fmtInt(
-        pessoas,
-      )}</strong> pessoas · atualizado: ${updates}`;
-    }
-    // Hide the source filter until the SS dataset actually exists.
-    if (!ss || !at) document.getElementById("source-chips")?.remove();
-    buildStepOptions();
-    update();
+    loaded = true;
+    renderRoute();
   } catch (err) {
-    results.innerHTML = `<p class="empty">Falha ao carregar os dados. Tente novamente mais tarde.</p>`;
+    const results = document.getElementById("results");
+    if (results)
+      results.innerHTML = `<p class="empty">Falha ao carregar os dados. Tente novamente mais tarde.</p>`;
     console.error(err);
   }
 }
